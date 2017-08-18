@@ -41,15 +41,23 @@
     class_addMethod(clazz, setterSelector, (IMP)jr_setter, types);
     
     // 4. 添加该观察者到观察者列表中
-    // 4.1 创建观察者的信息
-    JRObserverInfo *info = [[JRObserverInfo alloc] initWithObserver:observer key:key callback:callback];
-    // 4.2 获取关联对象(装着所有监听者的数组)
+    // 4.1 获取关联对象(装着所有监听者的数组)
     NSMutableArray *observers = objc_getAssociatedObject(self, JRAssociateArrayKey);
     if (!observers) {
         observers = [NSMutableArray array];
         objc_setAssociatedObject(self, JRAssociateArrayKey, observers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     
+    for (JRObserverInfo *Oinfo in observers) {
+        if([Oinfo.key isEqualToString:key] && [Oinfo.observer isEqual:observer]) {
+            NSLog(@" 相同的  %@  %@  更新callback",observer,key);
+            // 4.2 更新回调
+            [Oinfo setCallback:callback];
+            return;
+        }
+    }
+    // 4.2 创建观察者的信息
+    JRObserverInfo *info = [[JRObserverInfo alloc] initWithObserver:observer key:key callback:callback];
     [observers addObject:info];
     
 }
